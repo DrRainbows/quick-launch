@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Launch — Orbit Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="ui-overlay">
+  <!-- HEADER -->
+  <div id="header">
+    <h1>QUICK LAUNCH</h1>
+    <div class="subtitle" id="subtitle">CLICK ANYWHERE ON EARTH TO SELECT LAUNCH SITE</div>
+    <div id="site-selected" class="hidden" style="margin-top:10px;">
+      <div id="site-coords" style="font-size:15px; color:var(--cyan); margin-bottom:4px; font-weight:500;"></div>
+      <div id="site-orbit-info" style="font-size:11px; color:var(--text-dim); margin-bottom:10px;"></div>
+      <button id="generate-btn" style="
+        padding:10px 24px; font-family:inherit; font-size:13px; font-weight:700;
+        background:linear-gradient(135deg, #00e5ff, #2196f3);
+        color:#000; border:none; border-radius:4px; cursor:pointer;
+        letter-spacing:2px; text-transform:uppercase;
+      ">GENERATE VEHICLE</button>
+      <div style="font-size:10px; color:var(--text-dim); margin-top:6px;">Click elsewhere to change site</div>
+    </div>
+  </div>
+
+  <!-- COORDINATE DISPLAY -->
+  <div id="coord-display"></div>
+
+  <!-- TELEMETRY PANEL -->
+  <div id="telemetry-panel" class="panel hidden">
+    <div class="panel-title">TELEMETRY</div>
+    <div class="telem-big-label">SPEED</div>
+    <div class="telem-big">
+      <span class="telem-big-value" id="t-speed">0</span>
+      <span class="telem-big-unit">km/h</span>
+    </div>
+    <div class="telem-big-label">ALTITUDE</div>
+    <div class="telem-big">
+      <span class="telem-big-value" id="t-alt">0.0</span>
+      <span class="telem-big-unit">km</span>
+    </div>
+    <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:8px;">
+      <div class="telem-row"><span class="telem-label">Mach</span><span><span class="telem-value" id="t-mach">0.00</span></span></div>
+      <div class="telem-row"><span class="telem-label">Accel</span><span><span class="telem-value" id="t-accel">0.0</span><span class="telem-unit">g</span></span></div>
+      <div class="telem-row"><span class="telem-label">Max Q</span><span><span class="telem-value" id="t-dynp">0.0</span><span class="telem-unit">kPa</span></span></div>
+      <div class="telem-row"><span class="telem-label">Downrange</span><span><span class="telem-value" id="t-downrange">0.0</span><span class="telem-unit">km</span></span></div>
+    </div>
+    <!-- Velocity decomposition bars -->
+    <div class="vel-decomp" style="margin-top:8px; border-top:1px solid var(--border); padding-top:8px;">
+      <div class="telem-label" style="margin-bottom:4px;">VELOCITY DECOMPOSITION</div>
+      <div class="vel-bar-row">
+        <span class="vel-bar-label">V<sub>rad</sub></span>
+        <div class="vel-bar-track">
+          <div class="vel-bar-fill radial" id="v-rad-fill" style="width:0%"></div>
+        </div>
+        <span class="vel-bar-val" id="v-rad-val">0</span>
+        <span class="vel-bar-unit">m/s</span>
+      </div>
+      <div class="vel-bar-row">
+        <span class="vel-bar-label">V<sub>tan</sub></span>
+        <div class="vel-bar-track">
+          <div class="vel-bar-fill tangential" id="v-tan-fill" style="width:0%"></div>
+        </div>
+        <span class="vel-bar-val" id="v-tan-val">0</span>
+        <span class="vel-bar-unit">m/s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GNC PANEL -->
+  <div id="gnc-panel" class="panel hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <span class="phase-badge" id="g-phase">VERTICAL RISE</span>
+      <span class="telem-label" style="font-size:11px;">STG <span id="g-stage" style="color:var(--cyan);font-weight:700;">1</span></span>
+    </div>
+    <div class="telem-label" style="text-align:center; margin-bottom:4px;">ENGINES</div>
+    <div class="engine-grid" id="engine-grid"></div>
+    <div style="margin-top:6px;">
+      <div class="telem-label">THROTTLE</div>
+      <div class="throttle-bar"><div class="throttle-fill" id="g-throttle-fill" style="width:100%"></div></div>
+    </div>
+    <div class="prop-bars">
+      <div class="prop-bar-col">
+        <div class="prop-bar-pct" id="prop-lox-pct">100%</div>
+        <div class="prop-bar-track"><div class="prop-bar-fill lox" id="prop-lox-fill" style="height:100%"></div></div>
+        <div class="prop-bar-label">LOX</div>
+      </div>
+      <div class="prop-bar-col">
+        <div class="prop-bar-pct" id="prop-fuel-pct">100%</div>
+        <div class="prop-bar-track"><div class="prop-bar-fill fuel" id="prop-fuel-fill" style="height:100%"></div></div>
+        <div class="prop-bar-label">FUEL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVANCED ENGINEERING TELEMETRY -->
+  <div id="adv-panel" class="panel hidden">
+    <div class="panel-title">ENGINEERING</div>
+    <div class="adv-section">Orbital Elements</div>
+    <div class="adv-row"><span class="adv-label">SMA</span><span class="adv-value" id="a-sma">—</span></div>
+    <div class="adv-row"><span class="adv-label">Ecc</span><span class="adv-value" id="a-ecc">—</span></div>
+    <div class="adv-row"><span class="adv-label">Inc</span><span class="adv-value" id="a-inc">—</span></div>
+    <div class="adv-row"><span class="adv-label">Apo</span><span class="adv-value" id="a-apo">—</span></div>
+    <div class="adv-row"><span class="adv-label">Peri</span><span class="adv-value" id="a-peri">—</span></div>
+    <div class="adv-row"><span class="adv-label">Period</span><span class="adv-value" id="a-period">—</span></div>
+    <div class="adv-section">Vehicle</div>
+    <div class="adv-row"><span class="adv-label">Mass</span><span class="adv-value" id="a-mass">—</span></div>
+    <div class="adv-row"><span class="adv-label">Pitch</span><span class="adv-value" id="a-pitch">—</span></div>
+    <div class="adv-row"><span class="adv-label">Dyn Press</span><span class="adv-value" id="a-dynp">—</span></div>
+    <div class="adv-row"><span class="adv-label">Max Q</span><span class="adv-value" id="a-maxq">—</span></div>
+    <div class="adv-row"><span class="adv-label">Max G</span><span class="adv-value" id="a-maxg">—</span></div>
+    <div class="adv-section">ECI State</div>
+    <div class="adv-row"><span class="adv-label">Pos</span><span class="adv-value" id="a-pos">—</span></div>
+    <div class="adv-row"><span class="adv-label">Vel</span><span class="adv-value" id="a-vel">—</span></div>
+  </div>
+
+  <!-- OBJECT TRACKING PANEL -->
+  <div id="tracking-panel" class="panel hidden" style="position:absolute; bottom:20px; left:20px; width:280px; max-height:200px; overflow-y:auto;">
+    <div class="panel-title">TRACKING</div>
+    <div id="tracking-entries"></div>
+  </div>
+
+  <!-- MISSION TIMELINE BAR -->
+  <div id="timeline-bar" class="hidden">
+    <div class="timeline-track">
+      <div class="timeline-progress" id="timeline-progress" style="width:0%"></div>
+      <div class="timeline-events" id="timeline-events"></div>
+    </div>
+  </div>
+
+  <!-- MET DISPLAY -->
+  <div id="met-display" class="hidden">
+    <div class="telem-label">MISSION ELAPSED TIME</div>
+    <div id="met-time">T+00:00:00</div>
+    <div class="warp-controls">
+      <button id="warp-down" class="warp-btn" title="Decrease time warp (,)">&laquo;</button>
+      <div id="time-warp" class="warp-rate">1x</div>
+      <button id="warp-up" class="warp-btn" title="Increase time warp (.)">&raquo;</button>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:6px;">
+      <button id="track-btn" style="
+        padding:4px 10px; font-family:inherit; font-size:10px;
+        background:rgba(0,229,255,0.15); color:var(--cyan); border:1px solid var(--cyan);
+        border-radius:3px; cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+      ">TRACKING</button>
+      <button id="adv-btn" style="
+        padding:4px 10px; font-family:inherit; font-size:10px;
+        background:rgba(255,255,255,0.05); color:var(--text-dim); border:1px solid rgba(255,255,255,0.15);
+        border-radius:3px; cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+      ">ENG</button>
+    </div>
+  </div>
+
+  <!-- DESIGN PANEL -->
+  <div id="design-panel" class="panel hidden"></div>
+
+  <!-- COUNTDOWN -->
+  <div id="countdown" class="hidden"></div>
+
+  <!-- ORBIT ACHIEVED -->
+  <div id="orbit-panel" class="panel hidden"></div>
+
+  <!-- STAGE LOG -->
+  <div id="stage-log" class="panel hidden">
+    <div class="panel-title">EVENT LOG</div>
+    <div id="log-entries"></div>
+  </div>
+
+  <!-- TRAJECTORY PLOT -->
+  <div id="trajectory-plot" class="panel hidden">
+    <div class="panel-title">TRAJECTORY</div>
+    <canvas id="trajectory-canvas"></canvas>
+  </div>
+
+  <!-- AUDIO MUTE BUTTON -->
+  <button id="audio-mute-btn" title="Mute audio">MUTE</button>
+</div>
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- Pattern language engines (classic scripts, set window globals) -->
+<script src="lib/rocketGenerator.js"></script>
+<script src="lib/orbitalMechanics.js"></script>
+<script src="gnc.js"></script>
+
+<!-- ES module entry point -->
+<script type="module" src="./src/main.js"></script>
+
+</body>
+</html>

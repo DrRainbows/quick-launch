@@ -1,0 +1,22 @@
+{
+  "name": "quick-launch",
+  "version": "1.0.0",
+  "description": "Generative orbit simulator — click Earth, grow a rocket, fly it with real GNC",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test_audit.js",
+    "test:coords": "node test_coords.mjs",
+    "test:generator": "node test_generator.js",
+    "test:flightsim": "node test_flightsim.js",
+    "test:gnc": "node test_gnc.js",
+    "test:gnc-generated": "node test_gnc_generated.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DrRainbows/quick-launch.git"
+  }
+}
