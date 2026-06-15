@@ -1,3 +1,8 @@
+/**
+ * @file server.js
+ * @description Static file server for Launch Grammar (default port 8042).
+ */
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -31,5 +36,5 @@ http.createServer((req, res) => {
     res.end(data);
   });
 }).listen(PORT, () => {
-  console.log(`Orbit Simulator running at http://localhost:${PORT}`);
+  console.log(`Launch Grammar running at http://localhost:${PORT}`);
 });

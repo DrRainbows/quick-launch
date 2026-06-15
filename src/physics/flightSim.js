@@ -10,7 +10,7 @@ import { GM, RE, G0, OMEGA } from '../constants.js';
 import {
   GNCComputer, FlightSimulator, FlightPhase as GNCFlightPhase,
   Vec3, atmosphereModel, orbitalElements,
-} from './gncAdapter.js';
+} from '../adapters/gnc.js';
 
 // Re-export FlightPhase with the values main.js checks against.
 // main.js compares sim.phase to string literals like 'ORBIT_ACHIEVED' and 'ABORT'.

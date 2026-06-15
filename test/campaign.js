@@ -16,17 +16,7 @@ const fs   = require("fs");
 const path = require("path");
 
 // --- Load modules -----------------------------------------------------------
-let generateRocket;
-try {
-    generateRocket = require('../lib/rocketGenerator.js').generateRocket;
-} catch (e) {
-    try {
-        generateRocket = require('../rocketGenerator.js').generateRocket;
-    } catch (e2) {
-        console.error("ERROR: Cannot find rocketGenerator.js in ../lib/ or ../");
-        process.exit(1);
-    }
-}
+const { generateRocket } = require('../lib/rocketGenerator.js');
 
 const {
     CONST,

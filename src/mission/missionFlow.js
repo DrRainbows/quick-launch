@@ -1,12 +1,14 @@
-// ============================================================================
-// MISSION FLOW — Orchestrator: click → generate → design → countdown → ascent → orbit
-// ============================================================================
+/**
+ * @module src/mission/missionFlow
+ * @description Mission orchestrator: site selection → vehicle generation → launch → orbit.
+ *   Uses the shared stage config pipeline (`lib/shared/stageConfig.js`).
+ */
 
 import { GM, RE, DEG, SCALE, EARTH_RADIUS_SCENE } from '../constants.js';
 import { getState, dispatch } from '../store.js';
 import { emit } from '../eventBus.js';
-import { generateRocket } from '../rocket/generatorAdapter.js';
-import { planMission } from '../rocket/mechanicsAdapter.js';
+import { generateRocket } from '../adapters/rocketGenerator.js';
+import { planMission } from '../adapters/orbitalMechanics.js';
 import { buildStageConfigs } from '../rocket/stageConfig.js';
 import { FlightSim } from '../physics/flightSim.js';
 import { showPanel, hidePanel, hideAll } from '../ui/panels.js';
@@ -20,7 +22,7 @@ import { setCountdownCancel } from './cancelController.js';
 
 /**
  * Generate a rocket and mission plan for a given launch site.
- * Uses generateViableRocket — no fallbacks, no hardcoded vehicles.
+ * Retries until validation passes and stage configs are complete — no fallback vehicles.
  */
 export function generateRocketForMission(lat, lon) {
   const absLat = Math.abs(lat);

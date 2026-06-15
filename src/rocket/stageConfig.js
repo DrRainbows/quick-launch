@@ -1,90 +1,10 @@
-// ============================================================================
-// STAGE CONFIG — Generator simulationParams → FlightSim stage configs
-// ============================================================================
-// No fallbacks. No scaling hacks. The pattern language must produce a flyable
-// vehicle; missionFlow uses generateViableRocket() before we get here.
-
-import { G0 } from '../constants.js';
-
-/** Fold strap-on boosters into stage 1 for FlightSim (parallel burn approximation). */
-function mergeBoostersIntoStage1(simStages, rocket) {
-  const b = rocket.boosters;
-  if (!b || !simStages[0]) return;
-  const propEach = b.propellantMassEach ?? b.motor?.propellantMass;
-  const dryEach = b.dryMassEach ?? b.motor?.dryMass;
-  if (!propEach || !dryEach) return;
-
-  const s0 = simStages[0];
-  s0.propMass += propEach * b.count;
-  s0.dryMass += dryEach * b.count;
-  s0.thrustSL += b.totalThrustSL || 0;
-  s0.thrustVac += b.totalThrust || b.totalThrustSL || 0;
-}
-
 /**
- * Build FlightSim stage configs from generator output.
- * @throws {Error} if simulationParams are missing or incomplete
+ * @module src/rocket/stageConfig
+ * @description Browser re-export of shared stage configuration logic.
  */
-export function buildStageConfigs(rocket, mission) {
-  const simSeq = rocket.simulationParams?.stageSequence;
-  if (!simSeq || simSeq.length < 1) {
-    throw new Error('Rocket missing simulationParams.stageSequence — generator did not produce sim data');
-  }
 
-  const fairDiam = rocket.maxDiameter || rocket.fairing?.diameter || 3.7;
-  const refArea = rocket.simulationParams.referenceArea || Math.PI * (fairDiam / 2) ** 2;
-  const payloadMass = rocket.payload?.mass;
-  if (!payloadMass || payloadMass <= 0) {
-    throw new Error('Rocket missing payload mass');
-  }
-
-  const simStages = simSeq.map((s, i) => {
-    const dryMass = s.dryMass;
-    const propMass = s.propellantMass || s.propMass;
-    const thrustVac = s.thrustVac || 0;
-    const thrustSL = s.thrustSL || thrustVac;
-
-    if (!dryMass || !propMass || thrustVac < 1000) {
-      throw new Error(`Stage ${i + 1} incomplete in simulationParams`);
-    }
-
-    return {
-      dryMass,
-      propMass,
-      thrustSL,
-      thrustVac,
-      ispSL: s.ispSL || s.ispVac || 280,
-      ispVac: s.ispVac || 310,
-      nEngines: rocket.stages?.[i]?.engineCount || 1,
-      burnTime: s.burnTime,
-      refArea,
-    };
-  });
-
-  mergeBoostersIntoStage1(simStages, rocket);
-
-  const requiredDV = (mission?.selected?.deltaVRequired || rocket.mission?.requiredDeltaV || 0) * 1.02;
-  let totalDV = 0;
-  let massAbove = payloadMass;
-  for (let i = simStages.length - 1; i >= 0; i--) {
-    const s = simStages[i];
-    const m0 = s.dryMass + s.propMass + massAbove;
-    const mf = s.dryMass + massAbove;
-    totalDV += s.ispVac * G0 * Math.log(m0 / mf);
-    massAbove += s.dryMass + s.propMass;
-  }
-
-  if (totalDV < requiredDV) {
-    throw new Error(
-      `Stage configs dV ${totalDV.toFixed(0)} m/s below required ${requiredDV.toFixed(0)} m/s`
-    );
-  }
-
-  const liftoffMass = simStages.reduce((a, s) => a + s.dryMass + s.propMass, 0) + payloadMass;
-  const tw = simStages[0].thrustSL / (liftoffMass * G0);
-  if (tw < 1.05) {
-    throw new Error(`Stage 1 T/W ${tw.toFixed(2)} < 1.05 at liftoff`);
-  }
-
-  return { stages: simStages, payloadMass, fairingDiameter: fairDiam };
-}
+export {
+  buildStageConfigs,
+  mergeBoostersIntoStage1,
+  computeStackDeltaV,
+} from '../../lib/shared/stageConfig.js';

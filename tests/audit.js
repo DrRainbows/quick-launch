@@ -1,18 +1,23 @@
 #!/usr/bin/env node
-// Full audit runner — headless physics + generator + GNC verification.
+/**
+ * @file tests/audit.js
+ * @description Full audit runner — executes all test suites in sequence.
+ */
+
+'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
 const NODE = process.execPath;
-const root = __dirname;
+const root = path.join(__dirname, '..');
 
 const suites = [
-  { name: 'Coordinates', file: 'test_coords.mjs' },
-  { name: 'Rocket generator (200)', file: 'test_generator.js' },
-  { name: 'FlightSim ascent', file: 'test_flightsim.js' },
-  { name: 'GNC integration', file: 'test_gnc.js' },
-  { name: 'GNC + generated rockets', file: 'test_gnc_generated.js' },
+  { name: 'Coordinates', file: 'tests/coords.test.mjs' },
+  { name: 'Rocket generator (200)', file: 'tests/generator.test.js' },
+  { name: 'FlightSim ascent', file: 'tests/flightsim.test.mjs' },
+  { name: 'GNC integration', file: 'tests/gnc.test.js' },
+  { name: 'GNC + generated rockets', file: 'tests/gnc-generated.test.mjs' },
 ];
 
 console.log('╔══════════════════════════════════════════╗');
@@ -28,8 +33,10 @@ for (const suite of suites) {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+
   if (result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
+
   if (result.status !== 0) {
     allPass = false;
     console.error(`✗ ${suite.name} FAILED (exit ${result.status})\n`);
