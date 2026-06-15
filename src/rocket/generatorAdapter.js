@@ -12,6 +12,7 @@ if (!RG) {
 }
 
 export const generateRocket = RG.generateRocket;
+export const generateViableRocket = RG.generateViableRocket;
 export const generateEngine = RG.generateEngine;
 export const generateStage = RG.generateStage;
 export const generateFairing = RG.generateFairing;

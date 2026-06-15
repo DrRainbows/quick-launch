@@ -1,5 +1,5 @@
 {
-  "name": "quick-launch",
+  "name": "launch-grammar",
   "version": "1.0.0",
   "description": "Generative orbit simulator — click Earth, grow a rocket, fly it with real GNC",
   "scripts": {
@@ -17,6 +17,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DrRainbows/quick-launch.git"
+    "url": "https://github.com/DrRainbows/launch-grammar.git"
   }
 }

@@ -16,7 +16,7 @@ const suites = [
 ];
 
 console.log('╔══════════════════════════════════════════╗');
-console.log('║       QUICK LAUNCH — FULL AUDIT          ║');
+console.log('║       LAUNCH GRAMMAR — FULL AUDIT        ║');
 console.log('╚══════════════════════════════════════════╝\n');
 
 let allPass = true;
